@@ -1,0 +1,170 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Task_52
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            СriminalDataBase criminalDataBase = new СriminalDataBase();
+            criminalDataBase.Work();
+        }
+    }
+
+    class СriminalDataBase
+    {
+        private bool _isWork = true;
+        private List<Сriminal> _сriminals = new List<Сriminal>();
+
+        public void Work()
+        {
+            string userInput;
+
+            while (_isWork)
+            {
+                Console.WriteLine("\nДобро пожаловать! Выберите команду из предложенных:");
+                Console.WriteLine("1 - Начать поиск преступников по параметрам \n2 - Вывести список всех преступников \n3 - Выход");
+                userInput = Console.ReadLine();
+                Console.Clear();
+
+                switch (userInput)
+                {
+                    case "1":
+                        TryFindCriminals();
+                        break;
+                    case "2":
+                        ShowСriminals();
+                        break;
+                    case "3":
+                        _isWork = false;
+                        break;
+                    default:
+                        Console.WriteLine("\nДанные не корректны");
+                        break;
+                }
+            }
+        }
+
+        public СriminalDataBase()
+        {
+            _сriminals.Add(new Сriminal("Иванов Иван Иваныч", 192, 85, "Русский", "Под стражей"));
+            _сriminals.Add(new Сriminal("Петров Петр Петрович", 178, 91, "Беларус", "На воле"));
+            _сriminals.Add(new Сriminal("Сидоров Сидр Сидорович", 174, 81, "Украинец", "Под стражей"));
+            _сriminals.Add(new Сriminal("Сергиев Сергей Сергеевич", 186, 79, "Казах", "На воле"));
+            _сriminals.Add(new Сriminal("Алексеев Алексей Алексеевич", 182, 82, "Русский", "Под стражей"));
+            _сriminals.Add(new Сriminal("Алекссандров Александр Александрович", 168, 69, "Беларус", "На воле"));
+        }
+
+        private void TryFindCriminals()
+        {
+            int maxGrowthCriminal;
+            int MaxWeightCriminal;
+            string nationalityCriminal;
+            string userInput;
+            bool isStringNumber;
+
+            ShowСriminals();
+            Console.Write("\nВведите максимальный рост преступника: ");
+
+            isStringNumber = TryGetNumber(out userInput, out maxGrowthCriminal);
+
+            if (isStringNumber)
+            {
+                Console.Write("\nВведите максимальный вес преступника: ");
+                isStringNumber = TryGetNumber(out userInput, out MaxWeightCriminal);
+
+                if (isStringNumber)
+                {
+                    Console.Write("\nВведите национальность преступника: ");
+                    nationalityCriminal = Console.ReadLine();
+
+                    var filteredCriminals = from Сriminal criminal in _сriminals
+                                            where criminal.Growth < maxGrowthCriminal
+                                            where criminal.Weight < MaxWeightCriminal
+                                            where _сriminals.All(criminals => criminal.Nationality.StartsWith(nationalityCriminal))
+                                            where _сriminals.All(criminals => criminal.InCustody.StartsWith("На воле"))
+                                            select criminal.FullName;
+
+                    Console.WriteLine("\nРезультаты поиска:\n ");
+
+                    foreach (var criminal in filteredCriminals)
+                    {
+                        Console.WriteLine(criminal);
+                    }
+                    PutPlug("\nДля возврата в меню нажмите любую клавишу.");
+                }
+                else
+                {
+                    PutPlug("\nДанные не корректны.");
+                }
+            }
+            else
+            {
+                PutPlug("\nДанные не корректны.");
+            }
+        }
+
+        private void ShowСriminals()
+        {
+            if (_сriminals.Count > 0)
+            {
+                Console.WriteLine("\nСписок преступников:");
+
+                for (int i = 0; i < _сriminals.Count; i++)
+                {
+                    _сriminals[i].ShowInfo();
+                }
+            }
+            else
+            {
+                PutPlug("\nВаш список игроков - пуст. Для продолжения нажмите любую клавишу.");
+                Console.Clear();
+            }
+        }
+
+        private void PutPlug(string message)
+        {
+            Console.WriteLine(message);
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+        private bool TryGetNumber(out string userInput, out int result)
+        {
+            userInput = " ";
+            result = 0;
+            bool isStringNumber;
+
+            userInput = Console.ReadLine();
+            isStringNumber = int.TryParse(userInput, out result);
+            return isStringNumber;
+        }
+    }
+
+    class Сriminal
+    {
+        public string FullName { get; private set; }
+        public int Growth { get; private set; }
+        public int Weight { get; private set; }
+        public string Nationality { get; private set; }
+        public string InCustody { get; private set; }
+
+        public Сriminal(string fullName, int growth, int weight, string nationality, string inCustody)
+        {
+            FullName = fullName;
+            Growth = growth;
+            Weight = weight;
+            Nationality = nationality;
+            InCustody = inCustody;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"\nФИО - {FullName}. Рост - {Growth}. Вес - {Weight}. Национальность - {Nationality}. Статус ареста - {InCustody}");
+        }
+    }
+}
